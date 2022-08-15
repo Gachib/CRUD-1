@@ -47,29 +47,67 @@ const controller = {
 
 		let newProduct = {
 			...req.body,
+			price: +req.body.price,
+			discount: +req.body.discount,
 			id: lastId + 1,
-			image: "default-image.png"
+			image: req.file ? req.file.filename : "default-image.png",
 		}
 
 		products.push(newProduct);
 
 		writeProducts(products);
 
-		res.send(`El producto ${req.body.name} a sido creado exitosamente`);
+		res.redirect("/products");
 	},
 
 	// Update - Form to edit
 	edit: (req, res) => {
 		// Do the magic
+		let productId = +req.params.id;
+		let product = products.find(product => product.id === productId);
+
+		res.render("product-edit-form", {
+			product
+		})
 	},
 	// Update - Method to update
 	update: (req, res) => {
 		// Do the magic
+		let productId = +req.params.id;
+
+		products.forEach(product => {
+			if (product.id === productId){
+				product.name = req.body.name;
+				product.price = +req.body.price;
+				product.discount = +req.body.discount;
+				product.category = req.body.category;
+				product.description = req.body.description;
+			}
+
+			writeProducts(products);
+
+			res.redirect("/products");
+		});
 	},
 
 	// Delete - Delete one product from DB
 	destroy : (req, res) => {
 		// Do the magic
+		let productId = +req.params.id;
+		let productToDelete;
+
+		products.forEach(product => {
+			if (product.id === productId) {
+				productToDelete = product.name;
+				let productToDeleteIndex = products.indexOf(product);
+
+				products.splice(productToDeleteIndex, 1);
+			}
+		});
+
+		writeProducts(products);
+
+		res.redirect("/products");
 	}
 };
 
